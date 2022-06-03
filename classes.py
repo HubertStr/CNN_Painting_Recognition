@@ -106,6 +106,20 @@ class Model(nn.Module):
                     torch.save(optimizer.state_dict(), BEST_OPTIMIZER_PATH)
                     best_accuracy = validation_accuracy
             return train_losses, valid_losses, valid_accuracies
-                        
+
+    def test(self, path_model, txt_file, path_optimizer = None):
+        mod_trained = torch.load(str(path_model))
+        test_accuracies = []
+        mod_trained.eval()
+        with torch.no_grad(): 
+            test_error_count = 0.0
+            for images, labels in iter(self.test_set):
+                outputs = mod_trained(images)
+                # for x in outputs:
+                #     probabilities = torch.nn.functional.softmax(x, dim=0)
+                test_error_count += float(len(labels[labels != outputs.argmax(1)]))
+            test_accuracy = 1.0 - float(test_error_count) / float(len(self.test_set))
+            test_accuracies.append(test_accuracy)
+            print('accuracy test set: %f' % (test_accuracy))
                     
     
